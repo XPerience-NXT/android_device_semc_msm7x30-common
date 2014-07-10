@@ -54,9 +54,13 @@ TARGET_DISPLAY_INSECURE_MM_HEAP := true
 BOARD_EGL_CFG := device/semc/msm7x30-common/rootdir/system/etc/egl.cfg
 TARGET_NO_INITLOGO := true
 
+# Screenrecord
+BOARD_SCREENRECORD_LANDSCAPE_ONLY := true
+
 # Audio
 TARGET_QCOM_AUDIO_VARIANT := caf
 BOARD_USES_LEGACY_ALSA_AUDIO := true
+BOARD_HAVE_SEMC_AUDIO := true
 
 # GPS
 BOARD_USES_QCOM_GPS := true
@@ -69,12 +73,14 @@ BOARD_HAVE_BLUETOOTH := true
 # Camera
 TARGET_DISABLE_ARM_PIE := true
 BOARD_NEEDS_MEMORYHEAPPMEM := true
+BOARD_USES_PMEM_ADSP := true
 COMMON_GLOBAL_CFLAGS += -DSEMC_ICS_CAMERA_BLOB -DNEEDS_VECTORIMPL_SYMBOLS
 
 # Recovery
+TARGET_NO_SEPARATE_RECOVERY := true
 TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
 BOARD_CUSTOM_BOOTIMG_MK := device/semc/msm7x30-common/custombootimg.mk
-TARGET_RECOVERY_PRE_COMMAND := "/system/bin/pre-recovery.sh \#"
+TARGET_RECOVERY_PRE_COMMAND := "/sbin/pre-recovery.sh"
 TARGET_RECOVERY_FSTAB := device/semc/msm7x30-common/rootdir/recovery.fstab
 BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/semc/msm7x30-common/recovery/recovery_keys.c
 TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/platform/msm_hsusb/gadget/lun%d/file"
@@ -90,7 +96,9 @@ BOARD_KERNEL_PAGESIZE := 131072
 # We don't build bootloader nor radio
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
-COMMON_GLOBAL_CFLAGS += -DHAS_SEMC_BOOTLOADER
+
+# Radio
+BOARD_RIL_CLASS := ../../../device/semc/msm7x30-common/ril/
 
 # Boot Animation
 TARGET_BOOTANIMATION_PRELOAD := true

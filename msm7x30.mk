@@ -23,6 +23,8 @@ $(call inherit-product, frameworks/native/build/phone-hdpi-512-dalvik-heap.mk)
 
 $(call inherit-product, device/common/gps/gps_eu_supl.mk)
 
+PRODUCT_BOOT_JARS += qcmediaplayer
+
 # These are the common hardware-specific features
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
@@ -44,7 +46,7 @@ PRODUCT_COPY_FILES += \
 # Reboot to recovery related scripts
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/rootdir/sbin/postrecoveryboot.sh:recovery/root/sbin/postrecoveryboot.sh \
-    $(COMMON_PATH)/rootdir/system/bin/pre-recovery.sh:system/bin/pre-recovery.sh
+    $(COMMON_PATH)/rootdir/sbin/pre-recovery.sh:root/sbin/pre-recovery.sh
 
 # fstab
 PRODUCT_COPY_FILES += \
@@ -115,14 +117,26 @@ PRODUCT_PACKAGES += \
     libOmxVenc \
     libc2dcolorconvert
 
+# qcmediaplayer
+PRODUCT_PACKAGES += qcmediaplayer
+
 # Misc
 PRODUCT_PACKAGES += \
     com.android.future.usb.accessory \
     Torch
 
-# WiFi
+# Live wallpapers
 PRODUCT_PACKAGES += \
-    libnetcmdiface
+    Galaxy4 \
+    HoloSpiralWallpaper \
+    LiveWallpapers \
+    LiveWallpapersPicker \
+    MagicSmokeWallpapers \
+    NoiseField \
+    PhaseBeam \
+    VisualizationWallpapers \
+    PhotoTable \
+    PhotoPhase
 
 # we have enough storage space to hold precise GC data
 PRODUCT_TAGS += dalvik.gc.type-precise
@@ -151,25 +165,30 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     debug.sf.hw=1 \
     debug.egl.hw=1 \
-    debug.composition.type=gpu \
+    debug.composition.type=dyn \
     persist.hwc.mdpcomp.enable=false \
     debug.mdpcomp.maxlayer=3 \
-    debug.mdpcomp.logs=0 \
-    debug.hwc.dynThreshold=1.9
+    debug.mdpcomp.logs=0
 
 # The OpenGL ES API level that is natively supported by this device.
 # This is a 16.16 fixed point number.
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.opengles.version=131072
 
-# Video
-PRODUCT_PROPERTY_OVERRIDES += \
-    persist.camera.mem.usecache=0 \
-    persist.video.mem.usecache=0
-
 # Low Power Audio
 PRODUCT_PROPERTY_OVERRIDES += \
-    lpa.decode=true
+    lpa.decode=false \
+    audio.decoder_override_check=false \
+    use.non-omx.mp3.decoder=false \
+    use.non-omx.aac.decoder=false
+
+# Resampler quality
+PRODUCT_PROPERTY_OVERRIDES += \
+    af.resampler.quality=4
+
+# Disable gapless mode
+PRODUCT_PROPERTY_OVERRIDES += \
+    audio.gapless.playback.disable=true
 
 # Set default USB interface
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -177,7 +196,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Increase speed for UMS transfer
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.vold.umsdirtyratio=50
+    ro.vold.umsdirtyratio=20
 
 # Enable repeatable keys in CWM
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -191,10 +210,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # features that work poorly on low-memory devices.
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.config.low_ram=true
-
-# Enable KSM by default
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.ksm.default=1
 
 # proprietary side of the board
 $(call inherit-product, vendor/semc/msm7x30-common/msm7x30-common-vendor.mk)

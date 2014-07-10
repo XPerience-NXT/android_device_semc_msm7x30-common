@@ -6,6 +6,10 @@ import /init.board.rc
 on early-init
     mount debugfs debugfs /sys/kernel/debug
     chmod 666 /proc/cmdline
+    write /sys/block/mtdblock0/queue/scheduler noop
+    write /sys/block/mtdblock1/queue/scheduler noop
+    write /sys/block/mtdblock2/queue/scheduler noop
+    write /sys/block/mmcblk0/queue/scheduler noop
 
 on init
     mkdir /mnt/media_rw/sdcard0 0700 media_rw media_rw
@@ -21,6 +25,10 @@ on init
     symlink /storage/sdcard0 /mnt/sdcard
     symlink /storage/usbdisk /usbdisk
     symlink /storage/usbdisk /mnt/usbdisk
+
+    # Clear splash screen (blank and unblank)
+    write /sys/class/graphics/fb0/blank 1
+    write /sys/class/graphics/fb0/blank 0
 
 on early-boot
     # Offline charging
@@ -93,6 +101,14 @@ on boot
     chown root system /sys/devices/platform/mddi_sony_s6d05a1_hvga/dbc_ctrl
     chmod 0664 /sys/devices/platform/mddi_sony_s6d05a1_hvga/dbc_ctrl
 
+    # I/O scheduler
+    chown system system /sys/block/mtdblock0/queue/scheduler
+    chmod 0664 /sys/block/mtdblock0/queue/scheduler
+    chown system system /sys/block/mtdblock1/queue/scheduler
+    chmod 0664 /sys/block/mtdblock1/queue/scheduler
+    chown system system /sys/block/mtdblock2/queue/scheduler
+    chmod 0664 /sys/block/mtdblock2/queue/scheduler
+
     # Fix permissions for bma150 (accelerometer). Can be at different adresses.
     chown system system /sys/devices/i2c-0/0-0038/rate
     chown system system /sys/devices/i2c-4/4-0038/rate
@@ -131,11 +147,17 @@ on boot
     write /proc/sys/vm/page-cluster 0
 
 on fs
-    mount yaffs2 mtd@system /system ro
-    mount yaffs2 mtd@cache /cache rw noatime nosuid nodev
-    mount yaffs2 mtd@userdata /data rw noatime nosuid nodev
+    # Mount /system rw first to give the filesystem a chance to save a checkpoint
+    mount yaffs2 mtd@system /system
+    mount yaffs2 mtd@system /system ro remount
+    mount yaffs2 mtd@userdata /data nosuid nodev
+    mount yaffs2 mtd@cache /cache nosuid nodev
+
     mount_all /fstab.semc
     swapon_all /fstab.semc
+
+on post-fs-data
+    setprop vold.post_fs_data_done 1
 
 on property:init.svc.wpa_supplicant=stopped
     stop dhcpcd
